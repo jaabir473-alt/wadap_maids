@@ -1,0 +1,65 @@
+body {
+    background-color: #f4f7f6;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+.booking-wrapper {
+    max-width: 600px;
+    margin: 50px auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.form-header {
+    background-color: #0b3d2c; /* Wadap Green */
+    color: #d4af37; /* Wadap Gold */
+    padding: 20px;
+    text-align: center;
+}
+
+.form-section {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.form-section h3 {
+    color: #0b3d2c;
+    margin-bottom: 15px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.input-group input, .input-group select, .input-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.btn-gold {
+    width: 100%;
+    padding: 15px;
+    background-color: #d4af37;
+    color: #0b3d2c;
+    border: none;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-gold:hover {
+    background-color: #c19b2e;
+}
