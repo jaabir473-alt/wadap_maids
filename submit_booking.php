@@ -2,35 +2,33 @@
 session_start();
 include 'db_config.php';
 
-// Check if customer is actually logged in
+// 1. Check Login
 if (!isset($_SESSION['cust_id'])) {
-    // If not logged in, they MUST go to login. This prevents "Ghost" rows.
     header("Location: customer_login.php");
     exit();
 }
 
 if (isset($_POST['submit'])) {
-    // 1. Get ONLY the Customer ID from the SESSION
-    // This is the "Key" that links back to the existing user row.
+    // 2. Get the logged-in ID
     $customer_id = $_SESSION['cust_id'];
 
-    // 2. Collect Booking Details from the form
+    // 3. Get booking data
     $service = mysqli_real_escape_string($conn, $_POST['service_id']);
     $date = mysqli_real_escape_string($conn, $_POST['booking_date']);
 
-    // 3. INSERT INTO BOOKINGS TABLE ONLY
-    // We never "INSERT INTO customers" here.
+    // 4. THE ONLY SQL ALLOWED: Insert into bookings ONLY
+    // If you see any code below this line mentioning 'INSERT INTO customers', delete it!
     $sql = "INSERT INTO bookings (customer_id, service_type, booking_date) 
             VALUES ('$customer_id', '$service', '$date')";
 
     if ($conn->query($sql) === TRUE) {
         echo "<script>
-                alert('Success! Your booking for " . date('d M Y', strtotime($date)) . " has been recorded.');
-                window.location.href='booking.php'; 
+                alert('Success! Booking saved for Customer ID: $customer_id');
+                window.location.href='my_bookings.php'; 
               </script>";
         exit();
     } else {
-        echo "Database Error: " . $conn->error;
+        echo "Error: " . $conn->error;
     }
 }
 ?>

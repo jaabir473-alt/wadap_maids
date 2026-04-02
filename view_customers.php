@@ -1,99 +1,137 @@
 <?php
+session_start();
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: login.php");
+    exit();
+}
 include 'db_config.php';
 
-// Fetch all customers, ensuring 'city' is pulled from the database
-// This will group duplicates together so you only see 1 Jaabir and 1 Kevin
-// Only fetch customers who have a password (valid registered accounts)
+// Fetch Customer Data
 $sql = "SELECT * FROM customers WHERE password IS NOT NULL ORDER BY customer_id ASC";
 $result = $conn->query($sql);
+$total_clients = $result->num_rows;
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Customer Database | Wadap Maids</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Database | Wadap Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --wadap-green: #0b3d2c;
-            --wadap-gold: #d4af37;
-        }
-        .admin-container { padding: 40px; max-width: 1200px; margin: auto; }
-        .table-wrapper { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background-color: var(--wadap-green); color: var(--wadap-gold); padding: 15px; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.95rem; }
-        tr:hover { background-color: #f9fbf9; }
-        
-        /* Action Buttons */
-        .btn-action { padding: 6px 12px; text-decoration: none; border-radius: 6px; font-size: 0.8rem; font-weight: bold; display: inline-block; }
-        .edit-btn { background: var(--wadap-gold); color: var(--wadap-green); border: 1px solid var(--wadap-green); transition: 0.3s; }
-        .edit-btn:hover { background: var(--wadap-green); color: white; }
-
-        /* City Badge - Professional Look */
-        .city-badge { 
-            background: #e1f5fe; 
-            color: #01579b; 
-            padding: 4px 10px; 
-            border-radius: 20px; 
-            font-size: 0.8rem; 
-            font-weight: bold;
-            text-transform: uppercase;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-900 flex">
 
-<div class="admin-container">
-    <div class="table-header">
-        <h2>Customer Records</h2>
-        <p>Manage all registered clients in Penang and Kedah.</p>
-    </div>
+    <aside class="fixed inset-y-0 left-0 w-64 bg-[#0b3d2c] text-white hidden md:flex flex-col shadow-2xl no-print">
+        <div class="p-8">
+            <h2 class="text-2xl font-black tracking-tighter text-[#d4af37]">WADAP<span class="text-white">MAIDS</span></h2>
+        </div>
+        
+        <nav class="flex-1 px-4 space-y-2">
+            <a href="admin_bookings.php" class="flex items-center space-x-3 px-4 py-3 hover:bg-[#145a43] text-slate-300 hover:text-white rounded-xl transition-all">
+                <i class="fas fa-calendar-check w-5 text-center"></i>
+                <span>Bookings</span>
+            </a>
 
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Full Name</th>
-                    <th>Phone</th>
-                    <th>Email</th>
-                    <th>Address</th>
-                    <th>City</th>
-                    <th>Registration Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                if ($result && $result->num_rows > 0) {
-                    while($row = $result->fetch_assoc()) {
-                        // Display the city directly from the database
-                        // If the database has "Penang", it will show "Penang"
-                        $city = !empty($row['city']) ? htmlspecialchars($row['city']) : "N/A";
-                        
-                        echo "<tr>
-                                <td>#{$row['customer_id']}</td>
-                                <td><strong>" . htmlspecialchars($row['name']) . "</strong></td>
-                                <td>" . htmlspecialchars($row['phone']) . "</td>
-                                <td>" . htmlspecialchars($row['email']) . "</td>
-                                <td>" . htmlspecialchars($row['address']) . "</td>
-                                <td><span class='city-badge'>{$city}</span></td>
-                                <td>" . date('d M Y', strtotime($row['created_at'])) . "</td>
-                                <td>
-                                    <a href='edit_customer.php?id={$row['customer_id']}' class='btn-action edit-btn'>Edit Details</a>
-                                </td>
-                              </tr>";
-                    }
-                } else {
-                    echo "<tr><td colspan='8' style='text-align:center; padding: 40px; color: #777;'>No customers found. Try submitting a new booking!</td></tr>";
-                }
-                ?>
-            </tbody>
-        </table>
-    </div>
-</div>
+            <a href="view_customers.php" class="flex items-center space-x-3 px-4 py-3 bg-[#d4af37] text-[#0b3d2c] rounded-xl font-bold transition-all shadow-lg">
+                <i class="fas fa-users w-5 text-center"></i>
+                <span>Customers</span>
+            </a>
 
+            <a href="view_staff.php" class="flex items-center space-x-3 px-4 py-3 hover:bg-[#145a43] text-slate-300 hover:text-white rounded-xl transition-all">
+                <i class="fas fa-id-badge w-5 text-center"></i>
+                <span>Staff Management</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-[#145a43]">
+            <a href="logout.php" class="flex items-center space-x-3 px-4 py-3 text-red-400 hover:bg-red-500 hover:text-white rounded-xl transition-all font-medium">
+                <i class="fas fa-sign-out-alt w-5 text-center"></i>
+                <span>Logout Admin</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="md:ml-64 flex-1 min-h-screen">
+        <header class="bg-white/80 backdrop-blur-md sticky top-0 z-10 border-b border-slate-200 px-8 py-6 flex flex-wrap justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-extrabold text-[#0b3d2c]">Customer Database</h1>
+                <p class="text-slate-500 text-sm">Managing <span class="font-bold text-emerald-700"><?php echo $total_clients; ?></span> registered clients</p>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <div class="relative w-64">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fas fa-search text-xs"></i></span>
+                    <input type="text" id="custSearch" placeholder="Search name, phone, email..." class="w-full pl-9 pr-4 py-2 bg-slate-100 border-none rounded-xl text-sm focus:ring-2 focus:ring-[#d4af37] outline-none">
+                </div>
+                <button onclick="window.print()" class="bg-[#0b3d2c] text-[#d4af37] font-bold px-6 py-2.5 rounded-xl shadow-md hover:bg-[#145a43] transition-all flex items-center space-x-2">
+                    <i class="fas fa-print"></i>
+                    <span>Print Report</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-8">
+            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse" id="custTable">
+                        <thead>
+                            <tr class="bg-slate-50/50">
+                                <th class="p-6 text-slate-400 font-bold text-xs uppercase tracking-widest">ID</th>
+                                <th class="p-6 text-slate-400 font-bold text-xs uppercase tracking-widest">Full Name</th>
+                                <th class="p-6 text-slate-400 font-bold text-xs uppercase tracking-widest">Contact Details</th>
+                                <th class="p-6 text-slate-400 font-bold text-xs uppercase tracking-widest text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <?php if ($result->num_rows > 0): ?>
+                                <?php while($row = $result->fetch_assoc()): ?>
+                                <td class="p-6 font-mono text-slate-400 italic">
+    C<?php echo str_pad($row['customer_id'], 4, '0', STR_PAD_LEFT); ?>
+</td>
+                                    <td class="p-6">
+                                        <div class="font-bold text-slate-700"><?php echo htmlspecialchars($row['name']); ?></div>
+                                        <div class="text-[10px] font-black text-emerald-600 uppercase tracking-tighter">Verified Client</div>
+                                    </td>
+                                    <td class="p-6">
+                                        <div class="flex items-center text-slate-600 text-sm mb-1">
+                                            <i class="fas fa-phone mr-2 text-xs text-slate-400"></i> <?php echo htmlspecialchars($row['phone']); ?>
+                                        </div>
+                                        <div class="flex items-center text-slate-400 text-xs italic">
+                                            <i class="fas fa-envelope mr-2 text-[10px]"></i> <?php echo htmlspecialchars($row['email']); ?>
+                                        </div>
+                                    </td>
+                                    <td class="p-6 text-right">
+                                        <button class="bg-white border-2 border-slate-100 text-slate-600 px-4 py-1.5 rounded-xl text-xs font-bold uppercase hover:bg-slate-100 transition-all">
+                                            <i class="fas fa-user-edit mr-2"></i> Update
+                                        </button>
+                                    </td>
+                                </tr>
+                                <?php endwhile; ?>
+                            <?php else: ?>
+                                <tr><td colspan="4" class="p-20 text-center text-slate-400 italic font-medium">No customers found.</td></tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p class="mt-10 text-center text-slate-300 font-bold text-[10px] uppercase tracking-[0.3em]">WADAP MAIDS EMPIRE OPERATIONAL DATA DASHBOARD © 2026</p>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('custSearch').addEventListener('keyup', function() {
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll('.cust-row');
+            rows.forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none";
+            });
+        });
+    </script>
 </body>
 </html>
